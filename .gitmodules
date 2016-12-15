@@ -1,0 +1,15 @@
+[submodule "protobuf"]
+	path = protobuf
+	url = https://github.com/google/protobuf.git
+[submodule "rsc"]
+	path = rsc
+	url = https://code.cor-lab.org/git/rsc.git
+[submodule "rsb-protocol"]
+	path = rsb-protocol
+	url = https://code.cor-lab.org/git/rsb.git.protocol
+[submodule "rsb-cpp"]
+	path = rsb-cpp
+	url = https://code.cor-lab.org/git/rsb.git.cpp
+[submodule "rsb-spread"]
+	path = rsb-spread
+	url = https://code.cor-lab.org/git/rsb.git.spread-cpp
