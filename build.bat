@@ -103,7 +103,9 @@ IF NOT EXIST %target%\include\boost (
 
 IF EXIST %target_path%\bin\protoc.exe GOTO protobufDone
 
-cd protobuf\vsprojects
+cd protobuf
+git checkout v2.6.1
+cd vsprojects
 ECHO #define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS >> config.h
 devenv.exe /upgrade protobuf.sln
 
