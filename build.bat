@@ -6,7 +6,6 @@ SET arch=%1
 SET msvc=%2
 SET target=%3
 
-set PATH=%PATH%;C:\Program Files\7-Zip\
 set PATH=%PATH%;C:\Program Files (x86)\MSBuild\%msvc%.0\Bin
 set PATh=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio %msvc%.0\Common7\IDE
 
@@ -32,12 +31,6 @@ IF %ERRORLEVEL% NEQ 0 (
 WHERE git >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
 	ECHO Could not find git. Is it installed?
-	EXIT 1 
-)
-
-WHERE 7z >nul 2>nul
-IF %ERRORLEVEL% NEQ 0 (
-	ECHO Could not find 7z. Is it installed?
 	EXIT 1 
 )
 
