@@ -5,9 +5,14 @@ rem MsBuild.exe [Path to your solution(*.sln)] /t:Build /p:Configuration=Release
 SET arch=%1
 SET msvc=%2
 SET target=%3
+SET rst=%4
+
+set boost_version=boost-1.62.0
+set protobuf_version=
+set rsx_version=0.15
 
 set PATH=%PATH%;C:\Program Files (x86)\MSBuild\%msvc%.0\Bin
-set PATh=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio %msvc%.0\Common7\IDE
+set PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio %msvc%.0\Common7\IDE
 
 WHERE msbuild >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
@@ -34,8 +39,14 @@ IF %ERRORLEVEL% NEQ 0 (
 	EXIT 1 
 )
 
-if [%target] == [] (
+if [%target%] == [] (
 	SET target=Release
+)
+
+if "%target%" == "Release" (
+	set lower_target="release"
+) else (
+	set lower_target="debug"
 )
 
 rem Check Visual Studio Version
@@ -85,29 +96,31 @@ IF NOT EXIST %target_path%\include\sp.h (
 	xcopy spread-bin-4.0.0\include\* %target_path%\include\
 	xcopy spread-bin-4.0.0\bin\win32\*  %target_path%\bin\
 	xcopy spread-bin-4.0.0\lib\win32\*  %target_path%\lib\
-	xcopy spread-bin-4.0.0\doc\sample.spread.conf %target_path%\bin\spread.conf
+	xcopy spread-bin-4.0.0\docs\sample.spread.conf %target_path%\bin\spread.conf*
 )
 
-IF NOT EXIST %target%\include\boost (
+IF EXIST %absolute_path%\include\boost (
 	git clone --recursive --branch boost-1.62.0 https://github.com/boostorg/boost.git
 	cd boost
-	./bootstrap.sh
+	call bootstrap.bat
 	rem Python has not been included; Compilation would fail
-	./b2 --without-python link=static,shared
-	xcopy state\lib\*.lib %target_path%\lib\
-	xcopy state\lib\*.dll %target_path%\bin\
-	IF NOT EXIST %target_path%\include\boost mkdir %target_path%\include\boost
-	xcopy /S boost %target_path%\include\boost
+	b2 --reconfigure --without-python link=static,shared address-model=%bits% variant=%lower_target%
+    b2 headers
+	xcopy /y stage\lib\*.lib %absolute_path%\lib\
+	xcopy /y stage\lib\*.dll %absolute_path%\bin\
+	IF NOT EXIST %absolute_path%\include\boost mkdir %absolute_path%\include\boost
+	xcopy /S /y boost %absolute_path%\include\boost\
 	cd ..
 )
 
 IF EXIST %target_path%\bin\protoc.exe GOTO protobufDone
 
-cd protobuf
+cd protobuf/vsprojects
 git checkout v2.6.1
-cd vsprojects
+git clean -f
+git checkout *
 ECHO #define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS >> config.h
-devenv.exe /upgrade protobuf.sln
+devenv.exe protobuf.sln /upgrade
 
 :checkForUpgradeLog
 
@@ -116,32 +129,42 @@ IF NOT EXIST UpgradeLog.htm (
 	GOTO checkForUpgradeLog
 )
 
+IF "%arch%" == "x64" (
+	for %%p in (protoc, libprotobuf-lite, libprotobuf, libprotoc) do (
+		call ..\..\textreplace.bat %%p.vcxproj Win32 x64
+		call ..\..\textreplace.bat %%p.vcxproj MachineX86 MachineX64
+	)
+)
+
 for %%p in (libprotobuf-lite, libprotobuf, libprotoc) do (
-	msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%x64 %%p.vcxproj 
+	msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch% %%p.vcxproj 
 	xcopy /Y %target%\%%p.lib  %absolute_path%\lib
 )
 
 msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch% protoc.vcxproj
 xcopy /Y %target%\protoc.exe  %absolute_path%\bin 
 
+call extract_includes.bat
+xcopy /s /y include\google %absolute_path%\include\
+
 cd ..\..
-
-extract_includes.bat
-xcopy /S include\* %target_path%\include\
-
 
 :protobufDone
 
-rem rsc, rsb-protocol,
-for %%p in (rsb-cpp, rsb-spread) do (
+rem 
+for %%p in (rsc, rsb-protocol, rsb-cpp, rsb-spread) do (
 	ECHO Building %%p ...
 	cd %%p
-	git checkout 0.15
+	git checkout %rsx_version%
 	if not exist build mkdir build
 	cd build
 	cmake -G %generator% -DCMAKE_INSTALL_PREFIX=%absolute_path% -DPROTOBUF_INCLUDE_DIR=%absolute_path%\include ..
 	msbuild ALL.vcxproj /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%
 	msbuild INSTALL.vcxproj /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%
-	EXIT 0
 	cd ..\..
+	EXIT 0
+)
+
+IF NOT [%rst%] == [] (
+	ECHO hello
 )
