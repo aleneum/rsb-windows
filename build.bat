@@ -8,7 +8,7 @@ SET target=%3
 SET rst=%4
 
 set boost_version=boost-1.62.0
-set protobuf_version=
+set protobuf_version=v2.6.1
 set rsx_version=0.15
 
 set PATH=%PATH%;C:\Program Files (x86)\MSBuild\%msvc%.0\Bin
@@ -76,8 +76,10 @@ IF "%msvc%" == "10" (
 IF "%arch%" == "x64" (
 	set generator="%generator% Win64"
 	set bits=64
+	set arch_alt=x64
 ) ELSE (
 	set bits=32
+	set arch_alt=Win32
 )
 
 ECHO Build RSX 0.15 for %arch% using %generator%
@@ -93,13 +95,14 @@ IF NOT EXIST %target_path% (
 )
 
 IF NOT EXIST %target_path%\include\sp.h (
-	xcopy spread-bin-4.0.0\include\* %target_path%\include\
-	xcopy spread-bin-4.0.0\bin\win32\*  %target_path%\bin\
-	xcopy spread-bin-4.0.0\lib\win32\*  %target_path%\lib\
-	xcopy spread-bin-4.0.0\docs\sample.spread.conf %target_path%\bin\spread.conf*
+	xcopy /y spread-src-4.0.0\include\* %target_path%\include\
+	xcopy /y spread-src-4.0.0\lib\%arch_alt%\Release\bin\*  %target_path%\bin\
+	xcopy /y spread-src-4.0.0\lib\%arch_alt%\Release\lib\*  %target_path%\lib\
+	xcopy /y spread-src-4.0.0\docs\sample.spread.conf %target_path%\bin\spread.conf*
 )
 
-IF EXIST %absolute_path%\include\boost (
+
+IF NOT EXIST %absolute_path%\include\boost (
 	git clone --recursive --branch boost-1.62.0 https://github.com/boostorg/boost.git
 	cd boost
 	call bootstrap.bat
@@ -116,7 +119,7 @@ IF EXIST %absolute_path%\include\boost (
 IF EXIST %target_path%\bin\protoc.exe GOTO protobufDone
 
 cd protobuf/vsprojects
-git checkout v2.6.1
+git checkout %protobuf_version%
 git clean -f
 git checkout *
 ECHO #define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS >> config.h
@@ -145,26 +148,32 @@ msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch% protoc.vcxproj
 xcopy /Y %target%\protoc.exe  %absolute_path%\bin 
 
 call extract_includes.bat
-xcopy /s /y include\google %absolute_path%\include\
+xcopy /s /y include\google %absolute_path%\include\google\
 
 cd ..\..
 
 :protobufDone
 
-rem 
+rem build rsx components
 for %%p in (rsc, rsb-protocol, rsb-cpp, rsb-spread) do (
 	ECHO Building %%p ...
 	cd %%p
 	git checkout %rsx_version%
 	if not exist build mkdir build
 	cd build
-	cmake -G %generator% -DCMAKE_INSTALL_PREFIX=%absolute_path% -DPROTOBUF_INCLUDE_DIR=%absolute_path%\include ..
-	msbuild ALL.vcxproj /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%
+	cmake -G %generator% -DCMAKE_INSTALL_PREFIX=%absolute_path% -DPROTOBUF_INCLUDE_DIR=%absolute_path%\include -DCMAKE_BUILD_TYPE=%target% ..
 	msbuild INSTALL.vcxproj /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%
 	cd ..\..
-	EXIT 0
 )
 
+rem optionally build rst
 IF NOT [%rst%] == [] (
-	ECHO hello
+	git clone %rst% rst
+	cd rst
+	git checkout %rsx_version%
+	if not exist build mkdir build
+	cd build
+	cmake -G %generator% -DCMAKE_INSTALL_PREFIX=%absolute_path% -DPROTOBUF_INCLUDE_DIR=%absolute_path%\include -DCMAKE_BUILD_TYPE=%target% ..
+	msbuild INSTALL.vcxproj /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%
+	cd ..\..
 )

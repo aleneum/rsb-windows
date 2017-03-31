@@ -1,0 +1,4 @@
+build/
+*.VC.db
+spread-src-4.0.0/Win32/x64/
+spread-src-4.0.0/Win32/Win32/
