@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{e8f833af-7622-4c0c-b787-f3974f8f9a41}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm</Extensions>
+    </Filter>
+    <Filter Include="Source Files\stdutil">
+      <UniqueIdentifier>{8be1abb4-ca9c-4e61-b2c0-3fc664110487}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\daemon\alarm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\daemon\arch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\daemon\events.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libspread\fl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\daemon\memory.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libspread\scatp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libspread\sp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdarr.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdcarr.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stddll.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stderror.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdhash.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdit.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdskl.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdthread.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdtime.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+    <ClCompile Include="..\stdutil\src\stdutil.c">
+      <Filter>Source Files\stdutil</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
