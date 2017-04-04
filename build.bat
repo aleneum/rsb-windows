@@ -8,7 +8,9 @@ SET target=%3
 SET rst=%4
 
 set boost_version=boost-1.62.0
+REM set protobuf_version=v3.2.0
 set protobuf_version=v2.6.1
+
 set rsx_version=0.15
 
 set PATH=%PATH%;C:\Program Files (x86)\MSBuild\%msvc%.0\Bin
@@ -116,6 +118,19 @@ IF NOT EXIST %absolute_path%\include\boost (
 	cd ..
 )
 
+REM IF NOT EXIST %target_path%\bin\protoc.exe (
+REM 	cd protobuf
+REM 	git clone -b release-1.7.0 https://github.com/google/googlemock.git gmock
+REM 	cd gmock
+REM 	git clone -b release-1.7.0 https://github.com/google/googletest.git gtest
+REM 	cd ../cmake
+REM 	mkdir build
+REM 	cd build
+REM 	cmake -G %generator% -DCMAKE_INSTALL_PREFIX=%absolute_path% -DCMAKE_BUILD_TYPE=%target% -Dprotobuf_BUILD_SHARED_LIBS=ON ..
+REM 	msbuild INSTALL.vcxproj /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch%
+REM 	cd ../../..
+REM )
+
 IF EXIST %target_path%\bin\protoc.exe GOTO protobufDone
 
 cd protobuf/vsprojects
@@ -168,7 +183,7 @@ for %%p in (rsc, rsb-protocol, rsb-cpp, rsb-spread) do (
 
 rem optionally build rst
 IF NOT [%rst%] == [] (
-	git clone %rst% rst
+	git clone --recursive %rst% rst
 	cd rst
 	git checkout %rsx_version%
 	if not exist build mkdir build
