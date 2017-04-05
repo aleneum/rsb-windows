@@ -107,10 +107,12 @@ IF NOT EXIST %target_path%\include\sp.h (
 IF NOT EXIST %absolute_path%\include\boost (
 	git clone --recursive --branch boost-1.62.0 https://github.com/boostorg/boost.git
 	cd boost
-	call bootstrap.bat
+	IF NOT EXIST b2.exe (
+		call bootstrap.bat
+	)
 	rem Python has not been included; Compilation would fail
-	b2 --reconfigure --without-python link=static,shared address-model=%bits% variant=%lower_target%
-    b2 headers
+	b2.exe --reconfigure --without-python link=static,shared address-model=%bits% variant=%lower_target%
+    b2.exe headers
 	xcopy /y stage\lib\*.lib %absolute_path%\lib\
 	xcopy /y stage\lib\*.dll %absolute_path%\bin\
 	IF NOT EXIST %absolute_path%\include\boost mkdir %absolute_path%\include\boost
@@ -118,6 +120,7 @@ IF NOT EXIST %absolute_path%\include\boost (
 	cd ..
 )
 
+rem this can be used for protoc 3.2. This version requires some adaption in rsb if DLLs should be used
 REM IF NOT EXIST %target_path%\bin\protoc.exe (
 REM 	cd protobuf
 REM 	git clone -b release-1.7.0 https://github.com/google/googlemock.git gmock
@@ -181,9 +184,16 @@ for %%p in (rsc, rsb-protocol, rsb-cpp, rsb-spread) do (
 	cd ..\..
 )
 
-rem optionally build rst
-IF NOT [%rst%] == [] (
-	git clone --recursive %rst% rst
+rem optionally build rst if 
+rem batch does not support OR statements
+set build_rst=false
+IF NOT [%rst%] == [] set build_rst=true
+IF EXIST rst set build_rst=true
+
+IF  "%build_rst%" == "true" (
+	IF NOT [%rst%] == [] (
+		git clone --recursive %rst% rst
+	)
 	cd rst
 	git checkout %rsx_version%
 	if not exist build mkdir build
