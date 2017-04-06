@@ -19,26 +19,26 @@ set PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio %msvc%.0\Common7\
 WHERE msbuild >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
 	ECHO Could not find proper msbuild. Is it installed?
- 	EXIT 1 
+ 	EXIT 1
 )
 
 WHERE devenv.exe >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
 	ECHO Could not find Visual Studio IDE. Is it installed?
- 	EXIT 1 
+ 	EXIT 1
 )
 
 rem Test if cmake and git are installed
 WHERE cmake >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
 	ECHO Could not find cmake. Is it installed?
- 	EXIT 1 
+ 	EXIT 1
 )
 
 WHERE git >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
 	ECHO Could not find git. Is it installed?
-	EXIT 1 
+	EXIT 1
 )
 
 if [%target%] == [] (
@@ -105,9 +105,11 @@ IF NOT EXIST %target_path%\include\sp.h (
 
 
 IF NOT EXIST %absolute_path%\include\boost (
-	git clone --recursive --branch boost-1.62.0 https://github.com/boostorg/boost.git
 	cd boost
 	IF NOT EXIST b2.exe (
+		git checkout %boost_version%
+		git submodule init
+		git submodule update
 		call bootstrap.bat
 	)
 	rem Python has not been included; Compilation would fail
@@ -158,12 +160,12 @@ IF "%arch%" == "x64" (
 )
 
 for %%p in (libprotobuf-lite, libprotobuf, libprotoc) do (
-	msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch% %%p.vcxproj 
+	msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch% %%p.vcxproj
 	xcopy /Y %target%\%%p.lib  %absolute_path%\lib
 )
 
 msbuild /tv:%msvc%.0 /p:Configuration=%target% /p:Platform=%arch% protoc.vcxproj
-xcopy /Y %target%\protoc.exe  %absolute_path%\bin 
+xcopy /Y %target%\protoc.exe  %absolute_path%\bin
 
 call extract_includes.bat
 xcopy /s /y include\google %absolute_path%\include\google\
@@ -184,7 +186,7 @@ for %%p in (rsc, rsb-protocol, rsb-cpp, rsb-spread) do (
 	cd ..\..
 )
 
-rem optionally build rst if 
+rem optionally build rst if
 rem batch does not support OR statements
 set build_rst=false
 IF NOT [%rst%] == [] set build_rst=true

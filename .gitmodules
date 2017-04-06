@@ -13,3 +13,6 @@
 [submodule "rsb-spread"]
 	path = rsb-spread
 	url = https://code.cor-lab.org/git/rsb.git.spread-cpp
+[submodule "boost"]
+	path = boost
+	url = https://github.com/boostorg/boost.git
