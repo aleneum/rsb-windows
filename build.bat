@@ -10,7 +10,6 @@ SET rst=%4
 set boost_version=boost-1.62.0
 REM set protobuf_version=v3.2.0
 set protobuf_version=v2.6.1
-
 set rsx_version=0.15
 
 set PATH=%PATH%;C:\Program Files (x86)\MSBuild\%msvc%.0\Bin
